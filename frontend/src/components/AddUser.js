@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React,{useState} from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const AddUser = ()=>{
-    const [name,setName] = useState("");
-    const [email,setEmail] = useState("");
-    const [gender,setGender] = useState("Male");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [gender, setGender] = useState("Male");
     const navigate = useNavigate();
+    
 
     const saveUser = async (e) => {
         e.preventDefault();
+        console.log(name,email,gender)
         try{
             await axios.post("http://localhost:2000/users",{
                 name,
@@ -32,6 +34,7 @@ const AddUser = ()=>{
                             <input 
                                 type="text"
                                 className="input"
+                                name="name"
                                 value={name}
                                 onChange={(e)=>setName(e.target.value)}
                                 placeholder="Masukkan nama"
@@ -45,6 +48,7 @@ const AddUser = ()=>{
                             <input 
                                 type="text"
                                 className="input"
+                                name="email"
                                 value={email}
                                 onChange={(e)=>setEmail(e.target.value)}
                                 placeholder="Masukkan email"
@@ -57,8 +61,9 @@ const AddUser = ()=>{
                         <div className="control">
                             <div className="select is-fullwidth">
                                 <select
+                                    name="gender"
                                     value={gender}
-                                    onChange={(e) => setGender(e.target.value)}
+                                    onChange={(e)=>setGender(e.target.value)}
                                 >
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>

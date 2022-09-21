@@ -1,4 +1,36 @@
 import User from "../models/UserModel.js";
+import * as yup from "yup";
+
+
+export const addDataSchema = yup.object({
+    body: yup.object({
+        name: yup.string().min(5).max(32),
+        email:yup.string().email(),
+        gender:yup.string().min(1),
+    }),
+    params:yup.object({
+        id:yup.number(),
+    }),
+});
+
+export const editDataSchema = yup.object({
+    body: yup.object({
+        name: yup.string().min(5).max(32),
+    })
+})
+
+export const validate = (schema) => async(req,res,next) =>{
+    try{
+        await schema.validate({
+            body:req.body,
+            params:req.params,
+        });
+        return next();
+    } catch(err){
+        return res.status(500).json({ type:err.name,message:err.message });
+    }
+};
+
 
 export const getUsers = async (req,res) =>{
     try {
