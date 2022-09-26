@@ -1,41 +1,49 @@
 import User from "../models/UserModel.js";
-import * as yup from "yup";
-
-
-export const addDataSchema = yup.object({
-    body: yup.object({
-        name: yup.string().min(5).max(32),
-        email:yup.string().email(),
-        gender:yup.string().min(1),
-    }),
-    params:yup.object({
-        id:yup.number(),
-    }),
-});
-
-export const editDataSchema = yup.object({
-    body: yup.object({
-        name: yup.string().min(5).max(32),
-    })
-})
-
-export const validate = (schema) => async(req,res,next) =>{
-    try{
-        await schema.validate({
-            body:req.body,
-            params:req.params,
-        });
-        return next();
-    } catch(err){
-        return res.status(500).json({ type:err.name,message:err.message });
-    }
-};
+import {Op} from "sequelize";
 
 
 export const getUsers = async (req,res) =>{
     try {
-        const response = await User.findAll();
-        res.status(200).json(response);
+        const page = parseInt(req.query.page) || 0;
+        const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search_query || "";
+        const offset = limit * page;
+        const totalRows = await User.count({
+            where:{
+                [Op.or] : [{
+                    name:{
+                        [Op.like]:'%'+search+'%'
+                    }
+                },
+                {email:{
+                    [Op.like]:'%'+search+'%'
+                }}
+            ]
+            }
+        });
+        const totalPage = Math.ceil(totalRows/limit);
+        const response = await User.findAll({
+            where:{
+                [Op.or]:[{name:{
+                    [Op.like]:'%'+search+'%'
+                }}, {email:{
+                    [Op.like]:'%'+search+'%'
+                }},
+            ]
+            },
+            offset:offset,
+            limit:limit,
+            order:[
+                ['id','DESC']
+            ]
+        });
+        res.status(200).json({
+            result:response, //penggunaan result disini harga mati
+            page:page,
+            limit:limit,
+            totalRows:totalRows,
+            totalPage:totalPage
+        });
     }  catch(error) {
         console.log(error.message);
     }
